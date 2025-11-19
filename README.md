@@ -14,8 +14,8 @@ Regdown is a [Python-Markdown](https://python-markdown.github.io) extension for 
 
 ## Dependencies
 
-- Python 3.6, 3.8
-- [Python-Markdown](https://python-markdown.github.io) 3.2
+- Python 3.10+
+- [Python-Markdown](https://python-markdown.github.io) 3.4
 
 ## Installation
 
@@ -75,7 +75,7 @@ Section symbols will always have a non-breaking space (&nbsp;) inserted between 
 
 `see(label)`
 
-Insert the contents of labeled paragraphs in other Regdown documents inline into the current document. 
+Insert the contents of labeled paragraphs in other Regdown documents inline into the current document.
 
 References can be placed before or after paragraphs. These references are to labeled paragraphs in other Markdown documents. When a `contents_resolver` callback and `url_resolver` callback are provided, the text of those other paragraphs can be looked up and inserted inline into the document making the reference. If `render_block_reference` callback is provided, custom rendering of the referenced text to HTML can be performed.
 
