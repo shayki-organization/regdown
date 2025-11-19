@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import unittest
 
 import markdown
 
 from regdown import (
-    DEFAULT_RENDER_BLOCK_REFERENCE,
+    _default_block_reference,
+    _default_empty_reference,
     extract_labeled_paragraph,
     regdown,
 )
@@ -200,8 +200,7 @@ class RegulationsExtensionTestCase(unittest.TestCase):
             markdown.Markdown(extensions=["regdown"])
         except AttributeError as e:  # pragma: no cover
             self.fail(
-                "Markdown failed to load regdown extension: "
-                "{}".format(e.message)
+                f"Markdown failed to load regdown extension: {e.message}"
             )
 
     def test_block_reference_resolver_not_callable(self):
@@ -210,7 +209,7 @@ class RegulationsExtensionTestCase(unittest.TestCase):
             regdown(
                 text,
                 contents_resolver=None,
-                render_block_reference=DEFAULT_RENDER_BLOCK_REFERENCE,
+                render_block_reference=_default_block_reference,
             ),
             "",
         )
@@ -220,26 +219,27 @@ class RegulationsExtensionTestCase(unittest.TestCase):
         self.assertEqual(regdown(text, render_block_reference=None), "")
 
     def test_block_reference_no_contents(self):
-        contents_resolver = lambda ref: ""
         text = "see(foo-bar)"
         self.assertEqual(
             regdown(
                 text,
-                contents_resolver=contents_resolver,
-                render_block_reference=DEFAULT_RENDER_BLOCK_REFERENCE,
+                contents_resolver=_default_empty_reference,
+                render_block_reference=_default_block_reference,
             ),
             "",
         )
 
     def test_block_reference(self):
-        contents_resolver = lambda ref: "{foo-bar}\n# §FooBar\n\n"
+        def contents_resolver(ref):
+            return "{foo-bar}\n# §FooBar\n\n"
+
         text = "see(foo-bar)"
         self.assertIn(
             "<h1>§FooBar</h1>",
             regdown(
                 text,
                 contents_resolver=contents_resolver,
-                render_block_reference=DEFAULT_RENDER_BLOCK_REFERENCE,
+                render_block_reference=_default_block_reference,
             ),
         )
 
@@ -288,11 +288,11 @@ class RegulationsExtensionTestCase(unittest.TestCase):
 
     def test_pseudo_form_field_number_of_underscores(self):
         self.assertIn(
-            '<span class="regdown-form_extend">__' "<span></span></span>",
+            '<span class="regdown-form_extend">__<span></span></span>',
             regdown("Field: __"),
         )
         self.assertIn(
-            '<span class="regdown-form_extend">_______' "<span></span></span>",
+            '<span class="regdown-form_extend">_______<span></span></span>',
             regdown("Field: _______"),
         )
 
@@ -321,7 +321,7 @@ class RegdownUtilsTestCase(unittest.TestCase):
         self.assertIn("Third para", result)
 
     def test_extract_labeled_paragraph_not_found(self):
-        text = "{another-label} First para\n\n" "{next-label}Fourth para"
+        text = "{another-label} First para\n\n{next-label}Fourth para"
         result = extract_labeled_paragraph("my-label", text)
         self.assertEqual(result, "")
 

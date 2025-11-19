@@ -3,8 +3,8 @@ name = "regdown"
 version = "1.0.7"
 description = "Markdown extension for interactive regulations"
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "CC0"}
+requires-python = ">=3.10"
+license-files = ["LICENSE", "TERMS.md"]
 authors = [
     {name = "CFPB", email = "tech@cfpb.gov" }
 ]
@@ -12,8 +12,6 @@ dependencies = [
     "Markdown>=3.4",
 ]
 classifiers = [
-    "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
-    "License :: Public Domain",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
@@ -24,49 +22,45 @@ classifiers = [
 "Source" = "https://github.com/cfpb/regdown"
 
 [build-system]
-requires = ["setuptools>=43.0.0", "wheel"]
+requires = ["setuptools>=63", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
-[tool.black]
-line-length = 79
-target-version = ["py38"]
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs
-    | \.git
-    | \.tox
-    | \*.egg-info
-    | _build
-    | build
-    | dist
-    | migrations
-    | site
-  )/
-)
-'''
-
-[tool.isort]
-profile = "black"
-line_length = 79
-lines_after_imports = 2
-skip = [".tox", ".venv", "venv"]
-
 [tool.ruff]
+# Use PEP8 line-length
+line-length = 79
+# Exclude common paths
 exclude = [
     ".git",
     ".tox",
     "__pycache__",
 ]
+
+[tool.ruff.lint]
+ignore = []
+# Select specific rulesets to use
 select = [
+    # pycodestyle
     "E",
+    # pyflakes
     "F",
-    "W",
+    # flake8-bugbear
+    "B",
+    # pyupgrade
+    "UP",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
 ]
-ignore = [
-    # Assigned Lambdas are fine.
-    "E731",
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
 ]
 
 [tool.coverage.run]

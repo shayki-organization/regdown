@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 from hashlib import sha3_224
 from xml.etree import ElementTree as ET
@@ -24,28 +23,29 @@ SECTION_SYMBOL_RE = r"(?P<section_symbol>§)\s+"
 EMDASH_RE = r"---"
 
 
-DEFAULT_URL_RESOLVER = lambda ref: ""
-DEFAULT_CONTENTS_RESOLVER = lambda ref: ""
-DEFAULT_RENDER_BLOCK_REFERENCE = (
-    lambda c, **kwargs: "<blockquote>{}</blockquote>".format(regdown(c))
-)
+def _default_empty_reference(ref):
+    return ""
+
+
+def _default_block_reference(c, **kwargs):
+    return f"<blockquote>{regdown(c)}</blockquote>"
 
 
 class RegulationsExtension(Extension):
     config = {
         "url_resolver": [
-            DEFAULT_URL_RESOLVER,
+            _default_empty_reference,
             "Function to resolve the URL of a reference. "
             "Should return (title, url).",
         ],
         "contents_resolver": [
-            DEFAULT_CONTENTS_RESOLVER,
+            _default_empty_reference,
             "Function to resolve the contents of a reference. "
             "Should return markdown contents of the reference or an empty "
             "string.",
         ],
         "render_block_reference": [
-            DEFAULT_RENDER_BLOCK_REFERENCE,
+            _default_block_reference,
             "Function that will render a block reference",
         ],
     }
@@ -101,7 +101,7 @@ class EmDashPattern(Pattern):
     """Replace '---' with an &mdash;"""
 
     def handleMatch(self, m):
-        return "{}mdash;".format(util.AMP_SUBSTITUTE)
+        return f"{util.AMP_SUBSTITUTE}mdash;"
 
 
 class PseudoFormPattern(Pattern):
@@ -173,7 +173,7 @@ class LabeledParagraphProcessor(ParagraphProcessor):
             # e.g. A-2-d-1 becomes d-1 and gets a `level-1` class
             label = re.sub(r"^[A-Z]\d?\-\w+\-?", "", label)
             level = label.count("-")
-            class_name = "regdown-block level-{}".format(level)
+            class_name = f"regdown-block level-{level}"
             el.set("class", class_name)
 
             el.text = text.lstrip()
@@ -214,7 +214,7 @@ class BlockReferenceProcessor(BlockProcessor):
         contents_resolver=None,
         render_block_reference=None,
     ):
-        super(BlockReferenceProcessor, self).__init__(parser)
+        super().__init__(parser)
         self.url_resolver = url_resolver
         self.contents_resolver = contents_resolver
         self.render_block_reference = render_block_reference
@@ -281,12 +281,12 @@ def extract_labeled_paragraph(label, text, exact=True):
         match = LabeledParagraphProcessor.RE.search(line)
         if match:
             # It's the correct label and we want an exact match
-            if exact and match.group("label") == label:
-                para_lines.append(line)
-
-            # We don't want an exact match and the label starts with our given
-            # label
-            elif not exact and match.group("label").startswith(label):
+            if (
+                exact
+                and match.group("label") == label
+                or not exact
+                and match.group("label").startswith(label)
+            ):
                 para_lines.append(line)
 
             # We've already found a label, and this is another one
