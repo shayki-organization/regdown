@@ -1,6 +1,6 @@
 name: ci
 
-on: [pull_request]
+on: [pull_request, push]
 
 jobs:
 
@@ -8,12 +8,12 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
@@ -31,15 +31,15 @@ jobs:
 
     strategy:
       matrix:
-        python: ["3.8", "3.11"]
+        python: ["3.10", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python }}
 
       - name: Install dependencies
         run: |
@@ -53,10 +53,11 @@ jobs:
           TOXENV: python${{ matrix.python }}
 
       - name: Store test coverage
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage-${{ matrix.python }}
           path: .coverage.*
+          include-hidden-files: true
 
   coverage:
     name: coverage
@@ -65,14 +66,14 @@ jobs:
       - test
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
@@ -80,9 +81,9 @@ jobs:
           pip install tox
 
       - name: Retrieve test coverage
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          name: coverage
+          merge-multiple: true
 
       - name: Check coverage
         run: tox -e coverage
